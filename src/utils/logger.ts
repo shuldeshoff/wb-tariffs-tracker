@@ -1,7 +1,7 @@
-import { configure, getLogger } from "log4js";
+import log4js from "log4js";
 import env from "#config/env/env.js";
 
-configure({
+log4js.configure({
     appenders: {
         console: {
             type: "console",
@@ -27,5 +27,5 @@ configure({
     },
 });
 
-export const logger = getLogger();
+export const logger = log4js.getLogger();
 
