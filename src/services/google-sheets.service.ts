@@ -3,6 +3,7 @@ import env from "#config/env/env.js";
 import { logger } from "#utils/logger.js";
 import { tariffsRepository } from "#repositories/tariffs.repository.js";
 import { TariffRecord } from "#types/index.js";
+import { metricsService } from "#services/metrics.service.js";
 
 /**
  * Google Sheets Service
@@ -56,11 +57,15 @@ export class GoogleSheetsService {
         }
 
         logger.info(`Updating ${env.GOOGLE_SHEET_IDS.length} Google Sheets...`);
+        metricsService.setActiveTasks("update_sheets", 1);
+        const endTimer = metricsService.measureSheetsUpdateDuration();
 
         const tariffs = await tariffsRepository.getLatestTariffs();
 
         if (tariffs.length === 0) {
             logger.warn("No tariff data available to update sheets");
+            metricsService.setActiveTasks("update_sheets", 0);
+            endTimer();
             return;
         }
 
@@ -70,6 +75,17 @@ export class GoogleSheetsService {
 
         const successful = results.filter((r) => r.status === "fulfilled").length;
         const failed = results.filter((r) => r.status === "rejected").length;
+
+        if (successful > 0) {
+            metricsService.recordSheetsUpdate("success");
+        }
+        if (failed > 0) {
+            metricsService.recordSheetsUpdate("error");
+            metricsService.recordSheetsUpdateError();
+        }
+
+        metricsService.setActiveTasks("update_sheets", 0);
+        endTimer();
 
         logger.info(`Google Sheets update completed: ${successful} successful, ${failed} failed`);
     }

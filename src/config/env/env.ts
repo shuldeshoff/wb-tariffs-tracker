@@ -13,13 +13,12 @@ const envSchema = z.object({
     POSTGRES_DB: z.string().default("postgres"),
     POSTGRES_USER: z.string().default("postgres"),
     POSTGRES_PASSWORD: z.string().default("postgres"),
-    APP_PORT: z.union([
-        z.undefined(),
-        z
-            .string()
-            .regex(/^[0-9]+$/)
-            .transform((value) => parseInt(value)),
-    ]),
+    APP_PORT: z
+        .string()
+        .regex(/^[0-9]+$/)
+        .transform((value) => parseInt(value))
+        .optional()
+        .default("3000"),
     // Wildberries API
     WB_API_URL: z.string().url().optional(),
     WB_API_TOKEN: z.string().optional(),

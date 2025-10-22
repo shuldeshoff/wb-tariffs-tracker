@@ -2,6 +2,7 @@ import { wildberriesService } from "#services/wildberries.service.js";
 import { tariffsRepository } from "#repositories/tariffs.repository.js";
 import { WBTariffResponse, TariffRecord } from "#types/index.js";
 import { logger } from "#utils/logger.js";
+import { metricsService } from "#services/metrics.service.js";
 
 /**
  * Main data processing service
@@ -14,12 +15,14 @@ export class DataProcessingService {
     async fetchAndSaveTariffs(): Promise<boolean> {
         try {
             logger.info("Starting tariff data fetch and save process...");
+            metricsService.setActiveTasks("fetch_tariffs", 1);
 
             // Fetch data from WB API
             const data = await wildberriesService.fetchTariffs();
 
             if (!data) {
                 logger.error("Failed to fetch tariffs from WB API");
+                metricsService.setActiveTasks("fetch_tariffs", 0);
                 return false;
             }
 
@@ -28,16 +31,23 @@ export class DataProcessingService {
 
             if (tariffs.length === 0) {
                 logger.warn("No tariff data to save");
+                metricsService.setActiveTasks("fetch_tariffs", 0);
                 return false;
             }
 
             // Save to database
+            const endTimer = metricsService.measureDbOperation("upsert_tariffs");
             await tariffsRepository.upsertTariffs(tariffs);
+            endTimer();
 
+            metricsService.recordTariffsProcessed(tariffs.length);
+            metricsService.setActiveTasks("fetch_tariffs", 0);
+            
             logger.info(`Successfully processed and saved ${tariffs.length} tariff records`);
             return true;
         } catch (error) {
             logger.error(`Error in fetchAndSaveTariffs: ${error}`);
+            metricsService.setActiveTasks("fetch_tariffs", 0);
             return false;
         }
     }

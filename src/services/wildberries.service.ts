@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosError } from "axios";
 import env from "#config/env/env.js";
 import { logger } from "#utils/logger.js";
 import { WBTariffResponse } from "#types/index.js";
+import { metricsService } from "#services/metrics.service.js";
 
 /**
  * Wildberries API Service
@@ -44,6 +45,7 @@ export class WildberriesService {
      */
     async fetchTariffs(): Promise<WBTariffResponse | null> {
         let lastError: Error | null = null;
+        const endTimer = metricsService.measureWbApiDuration();
 
         for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             try {
@@ -56,16 +58,24 @@ export class WildberriesService {
                 }
 
                 logger.info(`Successfully fetched WB tariffs. Data: ${JSON.stringify(response.data).substring(0, 200)}...`);
+                
+                metricsService.recordWbApiRequest("success");
+                endTimer();
+                
                 return response.data;
             } catch (error) {
                 lastError = error as Error;
 
                 if (this.isAxiosError(error)) {
+                    const errorType = error.response?.status ? `http_${error.response.status}` : "network";
+                    metricsService.recordWbApiError(errorType);
+                    
                     logger.error(
                         `WB API error (attempt ${attempt}/${this.maxRetries}): ` +
                             `Status: ${error.response?.status}, Message: ${error.message}`
                     );
                 } else {
+                    metricsService.recordWbApiError("unknown");
                     logger.error(`Error fetching WB tariffs (attempt ${attempt}/${this.maxRetries}): ${error}`);
                 }
 
@@ -84,6 +94,9 @@ export class WildberriesService {
         }
 
         logger.error(`Failed to fetch WB tariffs after ${this.maxRetries} attempts: ${lastError?.message}`);
+        metricsService.recordWbApiRequest("error");
+        endTimer();
+        
         return null;
     }
 

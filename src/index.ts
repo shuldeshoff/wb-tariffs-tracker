@@ -1,6 +1,7 @@
 import env from "#config/env/env.js";
 import { logger } from "#utils/logger.js";
 import { schedulerService } from "#scheduler/index.js";
+import { httpServer } from "#services/http-server.service.js";
 
 /**
  * Main application entry point
@@ -14,6 +15,9 @@ class Application {
 
             // Log configuration
             this.logConfiguration();
+
+            // Start HTTP server
+            httpServer.start();
 
             // Start scheduler
             schedulerService.start();
@@ -40,10 +44,11 @@ class Application {
     }
 
     private setupGracefulShutdown(): void {
-        const shutdown = (signal: string) => {
+        const shutdown = async (signal: string) => {
             logger.info(`\nReceived ${signal} signal. Shutting down gracefully...`);
 
             schedulerService.stop();
+            await httpServer.stop();
 
             logger.info("Shutdown complete. Exiting.");
             process.exit(0);
