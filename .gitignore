@@ -6,3 +6,7 @@ logs/
 tsconfig.tsbuildinfo
 coverage/
 .DS_Store
+
+# Test compiled files (Jest works with .ts directly)
+tests/**/*.js
+tests/**/*.js.map
