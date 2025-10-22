@@ -8,11 +8,12 @@
         "dev": "nodemon --watch src --ext ts --exec tsx src/index.ts",
         "watch:build": "tsc --build --force --verbose --watch",
         "knex:dev": "tsx src/utils/knex.ts",
-
         "build": "tsc --allowJs",
         "start": "node dist/index.js",
         "knex": "node dist/utils/knex.js",
-        
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+        "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
         "tsc:check": "tsc --allowJs --noEmit",
         "prettier": "prettier --config .prettierrc.json src/**/*.js --check",
         "prettier-format": "prettier --config .prettierrc.json src/**/*.js --write",
@@ -52,9 +53,10 @@
         "@types/cors": "^2.8.17",
         "@types/dateformat": "^5.0.2",
         "@types/express": "^4.17.21",
-        "@types/jest": "^29.5.11",
+        "@types/jest": "^29.5.14",
         "@types/jsonwebtoken": "^9.0.8",
         "@types/knex": "^0.16.1",
+        "@types/node": "^24.9.1",
         "@types/node-cron": "^3.0.11",
         "@types/pg": "^8.11.10",
         "@types/uuid": "^10.0.0",
@@ -69,6 +71,7 @@
         "nodemon": "^3.0.2",
         "prettier": "^3.3.3",
         "prettier-plugin-jsdoc": "^1.3.0",
+        "ts-jest": "^29.4.5",
         "typescript": "^5.7.3"
     }
 }

@@ -7,7 +7,7 @@
         "allowJs": true,
         "checkJs": true,
         "skipLibCheck": true,
-        "rootDir": "./src",
+        "rootDir": ".",
         "outDir": "./dist",
         "paths": {
             "#*": [
@@ -18,7 +18,8 @@
     },
     "include": [
         "src/**/*.ts",
-        "src/**/*.js"
+        "src/**/*.js",
+        "tests/**/*.ts"
     ],
     "exclude": [
         "node_modules",
