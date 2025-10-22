@@ -1,0 +1,88 @@
+# provide a name if you wish
+# name: btlz-test
+
+networks:
+  postgres-net:
+    driver: bridge
+
+volumes:
+  postgres-vol:
+    driver: local
+
+services:
+
+  postgres:
+    container_name: postgres
+
+    image: postgres:16.1-alpine
+
+    environment:
+      - PGPORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
+    volumes:
+      - postgres-vol:/var/lib/postgresql/data
+
+    networks:
+      - postgres-net
+
+    expose:
+      - ${POSTGRES_PORT}
+
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    restart: unless-stopped
+
+
+  app:
+    container_name: wb-tariffs-app
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_PORT: ${APP_PORT}
+      NODE_ENV: production
+      WB_API_URL: ${WB_API_URL}
+      WB_API_TOKEN: ${WB_API_TOKEN}
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: ${GOOGLE_SERVICE_ACCOUNT_EMAIL}
+      GOOGLE_PRIVATE_KEY: ${GOOGLE_PRIVATE_KEY}
+      GOOGLE_SHEET_IDS: ${GOOGLE_SHEET_IDS}
+      CRON_FETCH_WB_DATA: ${CRON_FETCH_WB_DATA}
+      CRON_UPDATE_SHEETS: ${CRON_UPDATE_SHEETS}
+      LOG_LEVEL: ${LOG_LEVEL}
+
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - postgres-net
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 5
+
+    command: [ "npm", "run", "start" ]
+    restart: unless-stopped

@@ -1,0 +1,10 @@
+{
+    "plugins": ["prettier-plugin-jsdoc"],
+    "tabWidth": 4,
+    "printWidth": 160,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "singleAttributePerLine": false,
+    "quoteProps": "preserve",
+    "bracketSpacing": true
+}
