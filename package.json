@@ -1,6 +1,6 @@
 {
     "name": "wb-tariffs-service",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Service for fetching Wildberries tariffs and syncing with Google Sheets",
     "main": "app.js",
     "type": "module",

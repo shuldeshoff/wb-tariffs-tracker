@@ -9,6 +9,8 @@
 - Сохранение данных в PostgreSQL с накоплением истории по дням
 - Регулярное обновление данных в Google Sheets (лист `stocks_coefs`)
 - Автоматическая сортировка данных по коэффициенту
+- **HTTP endpoints для health checks и метрик**
+- **Prometheus метрики для мониторинга**
 
 ## Быстрый старт
 
@@ -50,6 +52,79 @@ docker compose up --build
 - Получит данные от WB API
 - Сохранит в базу данных
 - Обновит все указанные Google Sheets
+- **HTTP сервер будет доступен на порту 3000 (по умолчанию)**
+
+## API Endpoints
+
+После запуска приложения доступны следующие endpoints:
+
+| Endpoint | Описание | Метод |
+|----------|----------|--------|
+| `/health` | Комплексная проверка здоровья (БД + scheduler) | GET |
+| `/ready` | Проверка готовности к работе | GET |
+| `/live` | Проверка жизни приложения | GET |
+| `/metrics` | Prometheus метрики | GET |
+| `/status` | Статус сервиса и scheduler | GET |
+
+### Примеры использования
+
+```bash
+# Проверка здоровья приложения
+curl http://localhost:3000/health
+
+# Получение метрик для Prometheus
+curl http://localhost:3000/metrics
+
+# Проверка статуса
+curl http://localhost:3000/status
+```
+
+## Мониторинг и Метрики
+
+### Prometheus Метрики
+
+Приложение экспортирует следующие метрики:
+
+**Counters (Счётчики):**
+- `wb_api_requests_total{status}` - Всего запросов к WB API
+- `wb_api_errors_total{error_type}` - Всего ошибок WB API
+- `sheets_update_total{status}` - Всего обновлений Google Sheets
+- `sheets_update_errors_total` - Всего ошибок обновления Sheets
+- `tariffs_processed_total` - Всего обработанных тарифов
+
+**Gauges (Гауджи):**
+- `last_successful_fetch_timestamp` - Время последнего успешного получения данных
+- `last_successful_sheets_update_timestamp` - Время последнего успешного обновления таблиц
+- `active_tasks{task_type}` - Количество активных задач
+
+**Histograms (Гистограммы):**
+- `wb_api_duration_seconds` - Длительность запросов к WB API
+- `sheets_update_duration_seconds` - Длительность обновления Google Sheets
+- `db_operation_duration_seconds{operation}` - Длительность операций с БД
+
+### Health Checks
+
+**`/health` endpoint возвращает:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-10-22T12:00:00.000Z",
+  "uptime": 3600,
+  "checks": {
+    "database": {
+      "status": "healthy",
+      "latency": 5
+    },
+    "scheduler": {
+      "status": "healthy",
+      "tasks": {
+        "fetchData": "running",
+        "updateSheets": "running"
+      }
+    }
+  }
+}
+```
 
 ## Конфигурация
 
@@ -57,11 +132,12 @@ docker compose up --build
 
 | Переменная | Описание | По умолчанию |
 |-----------|----------|--------------|
-| `POSTGRES_HOST` | Хост PostgreSQL | `postgres` |
+| `POSTGRES_HOST` | Хост PostgreSQL | `localhost` |
 | `POSTGRES_PORT` | Порт PostgreSQL | `5432` |
 | `POSTGRES_DB` | Имя БД | `postgres` |
 | `POSTGRES_USER` | Пользователь БД | `postgres` |
 | `POSTGRES_PASSWORD` | Пароль БД | `postgres` |
+| `APP_PORT` | **Порт HTTP сервера** | **`3000`** |
 | `WB_API_URL` | URL WB API | `https://common-api.wildberries.ru/api/v1/tariffs/box` |
 | `WB_API_TOKEN` | Токен WB API | *обязательно* |
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Email Service Account | *обязательно* |
@@ -69,6 +145,8 @@ docker compose up --build
 | `GOOGLE_SHEET_IDS` | ID таблиц через запятую | *обязательно* |
 | `CRON_FETCH_WB_DATA` | Расписание получения данных | `0 * * * *` (каждый час) |
 | `CRON_UPDATE_SHEETS` | Расписание обновления таблиц | `*/30 * * * *` (каждые 30 мин) |
+| `LOG_LEVEL` | **Уровень логирования** | **`info`** |
+| `NODE_ENV` | **Окружение** | **`development`** |
 
 ### Настройка Google Service Account
 
@@ -222,8 +300,10 @@ docker compose restart app
 - **APIs:** Wildberries API, Google Sheets API v4
 - **Infrastructure:** Docker, Docker Compose
 - **Scheduler:** node-cron
-- **Testing:** Jest, ts-jest
+- **Testing:** Jest, ts-jest (покрытие >40%)
 - **Logging:** log4js
+- **HTTP Server:** Express
+- **Metrics:** prom-client (Prometheus)
 
 ## Автор
 
