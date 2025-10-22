@@ -4,8 +4,15 @@ export default {
     testEnvironment: 'node',
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
-        '^#(.*)$': '<rootDir>/src/$1',
+        '^#config/(.*)\\.(js|ts)$': '<rootDir>/src/config/$1',
+        '^#postgres/(.*)\\.(js|ts)$': '<rootDir>/src/postgres/$1',
+        '^#repositories/(.*)\\.(js|ts)$': '<rootDir>/src/repositories/$1',
+        '^#services/(.*)\\.(js|ts)$': '<rootDir>/src/services/$1',
+        '^#scheduler/(.*)\\.(js|ts)$': '<rootDir>/src/scheduler/$1',
+        '^#types/(.*)\\.(js|ts)$': '<rootDir>/src/types/$1',
+        '^#utils/(.*)\\.(js|ts)$': '<rootDir>/src/utils/$1',
         '^(\\.{1,2}/.*)\\.js$': '$1',
+        '^log4js$': '<rootDir>/tests/mocks/log4js.mock.ts',
     },
     transform: {
         '^.+\\.ts$': [
@@ -34,5 +41,8 @@ export default {
     clearMocks: true,
     resetMocks: true,
     restoreMocks: true,
+    transformIgnorePatterns: [
+        'node_modules/(?!(log4js)/)',
+    ],
 };
 

@@ -3,15 +3,16 @@ import { z } from "zod";
 dotenv.config();
 
 const envSchema = z.object({
-    NODE_ENV: z.union([z.undefined(), z.enum(["development", "production"])]),
-    POSTGRES_HOST: z.union([z.undefined(), z.string()]),
+    NODE_ENV: z.enum(["development", "production", "test"]).optional().default("development"),
+    POSTGRES_HOST: z.string().optional().default("localhost"),
     POSTGRES_PORT: z
         .string()
         .regex(/^[0-9]+$/)
-        .transform((value) => parseInt(value)),
-    POSTGRES_DB: z.string(),
-    POSTGRES_USER: z.string(),
-    POSTGRES_PASSWORD: z.string(),
+        .transform((value) => parseInt(value))
+        .default("5432"),
+    POSTGRES_DB: z.string().default("postgres"),
+    POSTGRES_USER: z.string().default("postgres"),
+    POSTGRES_PASSWORD: z.string().default("postgres"),
     APP_PORT: z.union([
         z.undefined(),
         z
