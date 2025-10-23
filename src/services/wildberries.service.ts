@@ -24,7 +24,7 @@ export class WildberriesService {
 
         // Add Authorization header if token is provided
         if (env.WB_API_TOKEN) {
-            this.client.defaults.headers.common["Authorization"] = env.WB_API_TOKEN;
+            this.client.defaults.headers.common["Authorization"] = `Bearer ${env.WB_API_TOKEN}`;
         }
 
         // Response interceptor for logging
@@ -47,11 +47,16 @@ export class WildberriesService {
         let lastError: Error | null = null;
         const endTimer = metricsService.measureWbApiDuration();
 
+        // Get current date in YYYY-MM-DD format (required by WB API)
+        const date = new Date().toISOString().split('T')[0];
+
         for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             try {
-                logger.info(`Fetching WB tariffs (attempt ${attempt}/${this.maxRetries})...`);
+                logger.info(`Fetching WB tariffs (attempt ${attempt}/${this.maxRetries}) for date: ${date}...`);
 
-                const response = await this.client.get<WBTariffResponse>("");
+                const response = await this.client.get<WBTariffResponse>("/api/v1/tariffs/box", {
+                    params: { date }
+                });
 
                 if (!response.data || !response.data.response) {
                     throw new Error("Invalid API response structure");

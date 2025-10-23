@@ -78,16 +78,26 @@ export class DataProcessingService {
                 coefficient,
                 dt_next_box: dtNextBox,
                 dt_till_max: dtTillMax,
-                delivery_base: warehouse.boxDeliveryBase || "0",
-                delivery_liter: warehouse.boxDeliveryLiter || "0",
-                storage_base: warehouse.boxStorageBase || "0",
-                storage_liter: warehouse.boxStorageLiter || "0",
+                delivery_base: this.parseNumber(warehouse.boxDeliveryBase),
+                delivery_liter: this.parseNumber(warehouse.boxDeliveryLiter),
+                storage_base: this.parseNumber(warehouse.boxStorageBase),
+                storage_liter: this.parseNumber(warehouse.boxStorageLiter),
                 raw_data: warehouse,
             };
         });
 
         logger.info(`Transformed ${tariffs.length} warehouse records`);
         return tariffs;
+    }
+
+    /**
+     * Parse number from string (handles both comma and dot as decimal separator)
+     */
+    private parseNumber(value: string | null | undefined): string {
+        if (!value || value === '-' || value.trim() === '') return "0";
+        // Replace comma with dot for PostgreSQL compatibility
+        // Remove any spaces
+        return value.replace(/,/g, '.').trim();
     }
 }
 
