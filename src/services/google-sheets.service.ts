@@ -129,18 +129,47 @@ export class GoogleSheetsService {
      * Sort by coefficient (ascending) and format as 2D array
      */
     private prepareSheetData(tariffs: TariffRecord[]): string[][] {
-        // Header row
-        const header = ["Склад", "Тип коробки", "Коэффициент", "Дата обновления", "Дата следующей коробки", "Дата до максимума"];
+        // Header row with all important fields
+        const header = [
+            "Склад",
+            "Регион",
+            "Тип коробки",
+            "Коэффициент",
+            "Коэф. доставки",
+            "Коэф. хранения",
+            "Доставка (база)",
+            "Доставка (литр)",
+            "Хранение (база)",
+            "Хранение (литр)",
+            "Дата обновления",
+            "Дата следующей коробки",
+            "Дата до максимума"
+        ];
 
         // Data rows (already sorted by coefficient in repository)
-        const rows = tariffs.map((tariff) => [
-            tariff.warehouse_name,
-            tariff.box_type,
-            tariff.coefficient.toString(),
-            tariff.date.toISOString().split("T")[0],
-            tariff.dt_next_box ? tariff.dt_next_box.toISOString().split("T")[0] : "",
-            tariff.dt_till_max ? tariff.dt_till_max.toISOString().split("T")[0] : "",
-        ]);
+        const rows = tariffs.map((tariff) => {
+            // Extract additional data from raw_data
+            const rawData = tariff.raw_data || {};
+            const geoName = rawData.geoName || "";
+            const deliveryCoef = rawData.boxDeliveryCoefExpr || "0";
+            const storageCoef = rawData.boxStorageCoefExpr || "0";
+
+            return [
+                tariff.warehouse_name,
+                geoName,
+                tariff.box_type,
+                tariff.coefficient.toString(),
+                deliveryCoef,
+                storageCoef,
+                tariff.delivery_base || "0",
+                tariff.delivery_liter || "0",
+                tariff.storage_base || "0",
+                tariff.storage_liter || "0",
+                tariff.date.toISOString().split("T")[0],
+                tariff.dt_next_box ? tariff.dt_next_box.toISOString().split("T")[0] : "",
+                tariff.dt_till_max ? tariff.dt_till_max.toISOString().split("T")[0] : "",
+            ];
+        });
 
         return [header, ...rows];
     }
