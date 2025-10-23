@@ -69,12 +69,16 @@ export class DataProcessingService {
         const dtTillMax = response.dtTillMax ? new Date(response.dtTillMax) : null;
 
         const tariffs: Omit<TariffRecord, "id" | "created_at" | "updated_at">[] = response.warehouseList.map((warehouse) => {
-            const coefficient = wildberriesService.parseCoefficient(warehouse.boxDeliveryAndStorageExpr);
+            // Calculate coefficient from delivery and storage expressions
+            // Using delivery coefficient as the main coefficient (as it's usually higher and more significant)
+            const deliveryCoef = wildberriesService.parseCoefficient(warehouse.boxDeliveryCoefExpr);
+            const storageCoef = wildberriesService.parseCoefficient(warehouse.boxStorageCoefExpr);
+            const coefficient = Math.max(deliveryCoef, storageCoef);
 
             return {
                 date: currentDate,
                 warehouse_name: warehouse.warehouseName,
-                box_type: warehouse.boxTypeName,
+                box_type: warehouse.boxTypeName || 'standard',
                 coefficient,
                 dt_next_box: dtNextBox,
                 dt_till_max: dtTillMax,

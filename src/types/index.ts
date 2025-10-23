@@ -21,12 +21,14 @@ export interface WBTariffResponse {
             dtTillMax: string;
             warehouseList: Array<{
                 warehouseName: string;
-                boxDeliveryAndStorageExpr: string;
+                boxDeliveryCoefExpr: string;
+                boxStorageCoefExpr: string;
                 boxDeliveryBase: string;
                 boxDeliveryLiter: string;
                 boxStorageBase: string;
                 boxStorageLiter: string;
-                boxTypeName: string;
+                boxTypeName?: string;
+                geoName?: string;
             }>;
         };
     };
