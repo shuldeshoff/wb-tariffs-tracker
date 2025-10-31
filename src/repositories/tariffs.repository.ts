@@ -3,10 +3,7 @@ import knex from "#postgres/knex.js";
 import { TariffRecord } from "#types/index.js";
 import { logger } from "#utils/logger.js";
 
-/**
- * Tariffs Repository
- * Handles database operations for tariffs table
- */
+/** Tariffs Repository Handles database operations for tariffs table */
 export class TariffsRepository {
     private db: Knex;
 
@@ -14,29 +11,23 @@ export class TariffsRepository {
         this.db = database;
     }
 
-    /**
-     * Upsert tariffs for a specific date
-     * Updates existing records or inserts new ones
-     */
+    /** Upsert tariffs for a specific date Updates existing records or inserts new ones */
     async upsertTariffs(tariffs: Omit<TariffRecord, "id" | "created_at" | "updated_at">[]): Promise<void> {
         try {
             logger.info(`Upserting ${tariffs.length} tariff records...`);
 
             for (const tariff of tariffs) {
-                await this.db("tariffs")
-                    .insert(tariff)
-                    .onConflict(["date", "warehouse_name", "box_type"])
-                    .merge({
-                        coefficient: tariff.coefficient,
-                        dt_next_box: tariff.dt_next_box,
-                        dt_till_max: tariff.dt_till_max,
-                        delivery_base: tariff.delivery_base,
-                        delivery_liter: tariff.delivery_liter,
-                        storage_base: tariff.storage_base,
-                        storage_liter: tariff.storage_liter,
-                        raw_data: tariff.raw_data,
-                        updated_at: this.db.fn.now(),
-                    });
+                await this.db("tariffs").insert(tariff).onConflict(["date", "warehouse_name", "box_type"]).merge({
+                    coefficient: tariff.coefficient,
+                    dt_next_box: tariff.dt_next_box,
+                    dt_till_max: tariff.dt_till_max,
+                    delivery_base: tariff.delivery_base,
+                    delivery_liter: tariff.delivery_liter,
+                    storage_base: tariff.storage_base,
+                    storage_liter: tariff.storage_liter,
+                    raw_data: tariff.raw_data,
+                    updated_at: this.db.fn.now(),
+                });
             }
 
             logger.info(`Successfully upserted ${tariffs.length} tariff records`);
@@ -46,15 +37,10 @@ export class TariffsRepository {
         }
     }
 
-    /**
-     * Get tariffs for a specific date, sorted by coefficient (ascending)
-     */
+    /** Get tariffs for a specific date, sorted by coefficient (ascending) */
     async getTariffsByDate(date: Date): Promise<TariffRecord[]> {
         try {
-            const tariffs = await this.db<TariffRecord>("tariffs")
-                .where("date", date)
-                .orderBy("coefficient", "asc")
-                .select("*");
+            const tariffs = await this.db<TariffRecord>("tariffs").where("date", date).orderBy("coefficient", "asc").select("*");
 
             logger.info(`Retrieved ${tariffs.length} tariffs for date ${date.toISOString()}`);
             return tariffs;
@@ -64,9 +50,7 @@ export class TariffsRepository {
         }
     }
 
-    /**
-     * Get latest tariffs (most recent date), sorted by coefficient (ascending)
-     */
+    /** Get latest tariffs (most recent date), sorted by coefficient (ascending) */
     async getLatestTariffs(): Promise<TariffRecord[]> {
         try {
             const latestDate = await this.db("tariffs").max("date as max_date").first();
@@ -76,10 +60,7 @@ export class TariffsRepository {
                 return [];
             }
 
-            const tariffs = await this.db<TariffRecord>("tariffs")
-                .where("date", latestDate.max_date)
-                .orderBy("coefficient", "asc")
-                .select("*");
+            const tariffs = await this.db<TariffRecord>("tariffs").where("date", latestDate.max_date).orderBy("coefficient", "asc").select("*");
 
             logger.info(`Retrieved ${tariffs.length} latest tariffs for date ${latestDate.max_date}`);
             return tariffs;
@@ -89,9 +70,7 @@ export class TariffsRepository {
         }
     }
 
-    /**
-     * Get all dates with tariff data
-     */
+    /** Get all dates with tariff data */
     async getAllDates(): Promise<Date[]> {
         try {
             const dates = await this.db("tariffs").distinct("date").orderBy("date", "desc");
@@ -103,9 +82,7 @@ export class TariffsRepository {
         }
     }
 
-    /**
-     * Delete tariffs older than specified days
-     */
+    /** Delete tariffs older than specified days */
     async deleteOldTariffs(daysToKeep: number = 30): Promise<number> {
         try {
             const cutoffDate = new Date();
@@ -124,4 +101,3 @@ export class TariffsRepository {
 
 // Export singleton instance
 export const tariffsRepository = new TariffsRepository();
-

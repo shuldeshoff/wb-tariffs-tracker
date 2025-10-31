@@ -58,7 +58,7 @@ describe("SchedulerService", () => {
 
         it("должен выполнить начальные задачи при старте", async () => {
             // Чтобы дождаться выполнения async задач
-            await new Promise(resolve => {
+            await new Promise((resolve) => {
                 service.start();
                 setTimeout(resolve, 100);
             });
@@ -79,7 +79,7 @@ describe("SchedulerService", () => {
             service.start();
 
             // Ждем выполнения начальных задач
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             // Очищаем моки после начальных вызовов
             jest.clearAllMocks();
@@ -104,7 +104,7 @@ describe("SchedulerService", () => {
             service.start();
 
             // Ждем выполнения начальных задач
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             // Очищаем моки после начальных вызовов
             jest.clearAllMocks();
@@ -131,7 +131,7 @@ describe("SchedulerService", () => {
             service.start();
 
             // Ждем выполнения начальных задач
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             // Вызываем cron callback вручную
             if (cronCallback) {
@@ -156,7 +156,7 @@ describe("SchedulerService", () => {
             service.start();
 
             // Ждем выполнения начальных задач
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             // Вызываем cron callback вручную
             if (cronCallback) {
@@ -215,4 +215,3 @@ describe("SchedulerService", () => {
         });
     });
 });
-

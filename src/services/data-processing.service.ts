@@ -4,14 +4,9 @@ import { WBTariffResponse, TariffRecord } from "#types/index.js";
 import { logger } from "#utils/logger.js";
 import { metricsService } from "#services/metrics.service.js";
 
-/**
- * Main data processing service
- * Fetches data from WB API and saves to database
- */
+/** Main data processing service Fetches data from WB API and saves to database */
 export class DataProcessingService {
-    /**
-     * Fetch tariffs from WB and save to database
-     */
+    /** Fetch tariffs from WB and save to database */
     async fetchAndSaveTariffs(): Promise<boolean> {
         try {
             logger.info("Starting tariff data fetch and save process...");
@@ -42,7 +37,7 @@ export class DataProcessingService {
 
             metricsService.recordTariffsProcessed(tariffs.length);
             metricsService.setActiveTasks("fetch_tariffs", 0);
-            
+
             logger.info(`Successfully processed and saved ${tariffs.length} tariff records`);
             return true;
         } catch (error) {
@@ -52,9 +47,7 @@ export class DataProcessingService {
         }
     }
 
-    /**
-     * Transform WB API response to database records
-     */
+    /** Transform WB API response to database records */
     private transformApiResponse(data: WBTariffResponse): Omit<TariffRecord, "id" | "created_at" | "updated_at">[] {
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); // Set to start of day
@@ -78,7 +71,7 @@ export class DataProcessingService {
             return {
                 date: currentDate,
                 warehouse_name: warehouse.warehouseName,
-                box_type: warehouse.boxTypeName || 'standard',
+                box_type: warehouse.boxTypeName || "standard",
                 coefficient,
                 dt_next_box: dtNextBox,
                 dt_till_max: dtTillMax,
@@ -94,17 +87,14 @@ export class DataProcessingService {
         return tariffs;
     }
 
-    /**
-     * Parse number from string (handles both comma and dot as decimal separator)
-     */
+    /** Parse number from string (handles both comma and dot as decimal separator) */
     private parseNumber(value: string | null | undefined): string {
-        if (!value || value === '-' || value.trim() === '') return "0";
+        if (!value || value === "-" || value.trim() === "") return "0";
         // Replace comma with dot for PostgreSQL compatibility
         // Remove any spaces
-        return value.replace(/,/g, '.').trim();
+        return value.replace(/,/g, ".").trim();
     }
 }
 
 // Export singleton instance
 export const dataProcessingService = new DataProcessingService();
-

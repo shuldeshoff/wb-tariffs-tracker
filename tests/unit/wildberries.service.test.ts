@@ -30,7 +30,7 @@ describe("WildberriesService", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        
+
         // Setup axios mock
         mockedAxios.create = jest.fn().mockReturnValue({
             get: jest.fn(),
@@ -45,7 +45,7 @@ describe("WildberriesService", () => {
                 },
             },
         }) as any;
-        
+
         service = new WildberriesService();
     });
 
@@ -106,4 +106,3 @@ describe("WildberriesService", () => {
         });
     });
 });
-

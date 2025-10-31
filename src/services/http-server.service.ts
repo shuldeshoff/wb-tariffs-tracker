@@ -5,13 +5,32 @@ import { metricsService } from "#services/metrics.service.js";
 import knex from "#postgres/knex.js";
 import { schedulerService } from "#scheduler/index.js";
 
-/**
- * HTTP Server for Health Checks and Metrics
- */
+import { Server } from "http";
+
+interface HealthCheck {
+    status: string;
+    latency?: number;
+    error?: string;
+}
+
+interface HealthStatus {
+    status: string;
+    timestamp: string;
+    uptime: number;
+    checks: {
+        database: HealthCheck;
+        scheduler: {
+            status: string;
+            tasks: Record<string, string>;
+        };
+    };
+}
+
+/** HTTP Server for Health Checks and Metrics */
 export class HttpServer {
     private app: Express;
     private port: number;
-    private server: any = null;
+    private server: Server | null = null;
 
     constructor() {
         this.app = express();
@@ -20,12 +39,10 @@ export class HttpServer {
         this.setupRoutes();
     }
 
-    /**
-     * Setup middleware
-     */
+    /** Setup middleware */
     private setupMiddleware(): void {
         this.app.use(express.json());
-        
+
         // Request logging
         this.app.use((req, res, next) => {
             logger.info(`${req.method} ${req.path}`);
@@ -33,9 +50,7 @@ export class HttpServer {
         });
     }
 
-    /**
-     * Setup routes
-     */
+    /** Setup routes */
     private setupRoutes(): void {
         // Health check endpoint
         this.app.get("/health", async (req: Request, res: Response) => {
@@ -57,7 +72,7 @@ export class HttpServer {
             try {
                 // Check database connection
                 await knex.raw("SELECT 1");
-                
+
                 res.status(200).json({
                     status: "ready",
                     timestamp: new Date().toISOString(),
@@ -105,16 +120,17 @@ export class HttpServer {
         });
     }
 
-    /**
-     * Get comprehensive health status
-     */
-    private async getHealthStatus(): Promise<any> {
-        const checks: any = {
-            database: await this.checkDatabase(),
-            scheduler: this.checkScheduler(),
+    /** Get comprehensive health status */
+    private async getHealthStatus(): Promise<HealthStatus> {
+        const database = await this.checkDatabase();
+        const scheduler = this.checkScheduler();
+
+        const checks = {
+            database,
+            scheduler,
         };
 
-        const allHealthy = Object.values(checks).every((check: any) => check.status === "healthy");
+        const allHealthy = database.status === "healthy" && scheduler.status === "healthy";
 
         return {
             status: allHealthy ? "healthy" : "unhealthy",
@@ -124,10 +140,8 @@ export class HttpServer {
         };
     }
 
-    /**
-     * Check database health
-     */
-    private async checkDatabase(): Promise<{ status: string; latency?: number; error?: string }> {
+    /** Check database health */
+    private async checkDatabase(): Promise<HealthCheck> {
         try {
             const start = Date.now();
             await knex.raw("SELECT 1");
@@ -137,18 +151,17 @@ export class HttpServer {
                 status: "healthy",
                 latency,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
             return {
                 status: "unhealthy",
-                error: error.message,
+                error: message,
             };
         }
     }
 
-    /**
-     * Check scheduler health
-     */
-    private checkScheduler(): { status: string; tasks: any } {
+    /** Check scheduler health */
+    private checkScheduler(): { status: string; tasks: Record<string, string> } {
         const tasks = schedulerService.getStatus();
         const allRunning = Object.values(tasks).every((status) => status === "running");
 
@@ -158,9 +171,7 @@ export class HttpServer {
         };
     }
 
-    /**
-     * Start HTTP server
-     */
+    /** Start HTTP server */
     start(): void {
         this.server = this.app.listen(this.port, () => {
             logger.info(`HTTP server started on port ${this.port}`);
@@ -170,9 +181,7 @@ export class HttpServer {
         });
     }
 
-    /**
-     * Stop HTTP server
-     */
+    /** Stop HTTP server */
     stop(): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!this.server) {
@@ -195,4 +204,3 @@ export class HttpServer {
 
 // Export singleton instance
 export const httpServer = new HttpServer();
-

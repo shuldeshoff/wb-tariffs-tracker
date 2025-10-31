@@ -239,6 +239,25 @@ npm run test:watch
 npm run test:coverage
 ```
 
+### Линтинг и форматирование
+
+```bash
+# Проверить код с ESLint
+npm run lint
+
+# Автоматически исправить ошибки
+npm run lint:fix
+
+# Проверить с нулевой толерантностью к warnings (для CI)
+npm run lint:check
+
+# Проверить форматирование Prettier
+npm run prettier
+
+# Исправить форматирование
+npm run prettier-format
+```
+
 ### Миграции
 
 ```bash

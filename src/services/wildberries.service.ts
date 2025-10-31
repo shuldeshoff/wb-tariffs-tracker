@@ -4,10 +4,7 @@ import { logger } from "#utils/logger.js";
 import { WBTariffResponse } from "#types/index.js";
 import { metricsService } from "#services/metrics.service.js";
 
-/**
- * Wildberries API Service
- * Handles fetching tariff data from WB API
- */
+/** Wildberries API Service Handles fetching tariff data from WB API */
 export class WildberriesService {
     private client: AxiosInstance;
     private maxRetries: number = 3;
@@ -36,26 +33,24 @@ export class WildberriesService {
             (error) => {
                 logger.error(`WB API request failed: ${error.message}`);
                 return Promise.reject(error);
-            }
+            },
         );
     }
 
-    /**
-     * Fetch tariffs data from WB API with retry logic
-     */
+    /** Fetch tariffs data from WB API with retry logic */
     async fetchTariffs(): Promise<WBTariffResponse | null> {
         let lastError: Error | null = null;
         const endTimer = metricsService.measureWbApiDuration();
 
         // Get current date in YYYY-MM-DD format (required by WB API)
-        const date = new Date().toISOString().split('T')[0];
+        const date = new Date().toISOString().split("T")[0];
 
         for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             try {
                 logger.info(`Fetching WB tariffs (attempt ${attempt}/${this.maxRetries}) for date: ${date}...`);
 
                 const response = await this.client.get<WBTariffResponse>("/api/v1/tariffs/box", {
-                    params: { date }
+                    params: { date },
                 });
 
                 if (!response.data || !response.data.response) {
@@ -63,10 +58,10 @@ export class WildberriesService {
                 }
 
                 logger.info(`Successfully fetched WB tariffs. Data: ${JSON.stringify(response.data).substring(0, 200)}...`);
-                
+
                 metricsService.recordWbApiRequest("success");
                 endTimer();
-                
+
                 return response.data;
             } catch (error) {
                 lastError = error as Error;
@@ -74,11 +69,8 @@ export class WildberriesService {
                 if (this.isAxiosError(error)) {
                     const errorType = error.response?.status ? `http_${error.response.status}` : "network";
                     metricsService.recordWbApiError(errorType);
-                    
-                    logger.error(
-                        `WB API error (attempt ${attempt}/${this.maxRetries}): ` +
-                            `Status: ${error.response?.status}, Message: ${error.message}`
-                    );
+
+                    logger.error(`WB API error (attempt ${attempt}/${this.maxRetries}): ` + `Status: ${error.response?.status}, Message: ${error.message}`);
                 } else {
                     metricsService.recordWbApiError("unknown");
                     logger.error(`Error fetching WB tariffs (attempt ${attempt}/${this.maxRetries}): ${error}`);
@@ -101,28 +93,21 @@ export class WildberriesService {
         logger.error(`Failed to fetch WB tariffs after ${this.maxRetries} attempts: ${lastError?.message}`);
         metricsService.recordWbApiRequest("error");
         endTimer();
-        
+
         return null;
     }
 
-    /**
-     * Type guard for AxiosError
-     */
-    private isAxiosError(error: any): error is AxiosError {
-        return error.isAxiosError === true;
+    /** Type guard for AxiosError */
+    private isAxiosError(error: unknown): error is AxiosError {
+        return typeof error === "object" && error !== null && "isAxiosError" in error && error.isAxiosError === true;
     }
 
-    /**
-     * Delay helper for retry logic
-     */
+    /** Delay helper for retry logic */
     private delay(ms: number): Promise<void> {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    /**
-     * Parse coefficient from expression string
-     * Example: "2.5" or "3"
-     */
+    /** Parse coefficient from expression string Example: "2.5" or "3" */
     parseCoefficient(expr: string): number {
         try {
             const num = parseFloat(expr);
@@ -135,4 +120,3 @@ export class WildberriesService {
 
 // Export singleton instance
 export const wildberriesService = new WildberriesService();
-

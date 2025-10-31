@@ -25,7 +25,10 @@ const envSchema = z.object({
     // Google Sheets
     GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().email().optional(),
     GOOGLE_PRIVATE_KEY: z.string().optional(),
-    GOOGLE_SHEET_IDS: z.string().transform((val) => val.split(",")).optional(),
+    GOOGLE_SHEET_IDS: z
+        .string()
+        .transform((val) => val.split(","))
+        .optional(),
     // Cron schedules
     CRON_FETCH_WB_DATA: z.string().default("0 * * * *"),
     CRON_UPDATE_SHEETS: z.string().default("*/30 * * * *"),

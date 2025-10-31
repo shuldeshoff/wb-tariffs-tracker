@@ -116,9 +116,7 @@ describe("GoogleSheetsService", () => {
 
         it("должен обработать частичные ошибки при обновлении нескольких sheets", async () => {
             mockTariffsRepository.getLatestTariffs.mockResolvedValue(mockTariffs);
-            mockSheets.spreadsheets.values.update
-                .mockResolvedValueOnce({})
-                .mockRejectedValueOnce(new Error("Sheet error"));
+            mockSheets.spreadsheets.values.update.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error("Sheet error"));
 
             await service.updateAllSheets();
 
@@ -134,24 +132,10 @@ describe("GoogleSheetsService", () => {
             const values = updateCall.requestBody.values;
 
             // Проверяем заголовок
-            expect(values[0]).toEqual([
-                "Склад",
-                "Тип коробки",
-                "Коэффициент",
-                "Дата обновления",
-                "Дата следующей коробки",
-                "Дата до максимума",
-            ]);
+            expect(values[0]).toEqual(["Склад", "Тип коробки", "Коэффициент", "Дата обновления", "Дата следующей коробки", "Дата до максимума"]);
 
             // Проверяем данные
-            expect(values[1]).toEqual([
-                "Коледино",
-                "Короб",
-                "1.5",
-                "2025-10-22",
-                "2025-10-23",
-                "2025-10-30",
-            ]);
+            expect(values[1]).toEqual(["Коледино", "Короб", "1.5", "2025-10-22", "2025-10-23", "2025-10-30"]);
         });
 
         it("должен корректно обрабатывать null значения дат", async () => {
@@ -202,13 +186,17 @@ describe("GoogleSheetsService - без конфигурации", () => {
 
     it("должен пропустить инициализацию если нет credentials", async () => {
         // Mock env без credentials
-        jest.mock("#config/env/env.js", () => ({
-            default: {
-                GOOGLE_SERVICE_ACCOUNT_EMAIL: undefined,
-                GOOGLE_PRIVATE_KEY: undefined,
-                GOOGLE_SHEET_IDS: [],
-            },
-        }), { virtual: true });
+        jest.mock(
+            "#config/env/env.js",
+            () => ({
+                default: {
+                    GOOGLE_SERVICE_ACCOUNT_EMAIL: undefined,
+                    GOOGLE_PRIVATE_KEY: undefined,
+                    GOOGLE_SHEET_IDS: [],
+                },
+            }),
+            { virtual: true },
+        );
 
         const service = new GoogleSheetsService();
         await service.updateAllSheets();
@@ -217,4 +205,3 @@ describe("GoogleSheetsService - без конфигурации", () => {
         expect(true).toBe(true);
     });
 });
-

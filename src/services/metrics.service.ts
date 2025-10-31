@@ -1,10 +1,7 @@
 import { Registry, Counter, Gauge, Histogram } from "prom-client";
 import { logger } from "#utils/logger.js";
 
-/**
- * Prometheus Metrics Service
- * Collects and exposes application metrics
- */
+/** Prometheus Metrics Service Collects and exposes application metrics */
 export class MetricsService {
     public registry: Registry;
 
@@ -108,9 +105,7 @@ export class MetricsService {
         logger.info("Metrics service initialized");
     }
 
-    /**
-     * Record WB API request
-     */
+    /** Record WB API request */
     recordWbApiRequest(status: "success" | "error"): void {
         this.wbApiRequestsTotal.labels(status).inc();
         if (status === "success") {
@@ -118,24 +113,18 @@ export class MetricsService {
         }
     }
 
-    /**
-     * Record WB API error
-     */
+    /** Record WB API error */
     recordWbApiError(errorType: string): void {
         this.wbApiErrorsTotal.labels(errorType).inc();
     }
 
-    /**
-     * Measure WB API request duration
-     */
+    /** Measure WB API request duration */
     measureWbApiDuration(): () => void {
         const end = this.wbApiDuration.startTimer();
         return () => end();
     }
 
-    /**
-     * Record Google Sheets update
-     */
+    /** Record Google Sheets update */
     recordSheetsUpdate(status: "success" | "error"): void {
         this.sheetsUpdateTotal.labels(status).inc();
         if (status === "success") {
@@ -143,53 +132,39 @@ export class MetricsService {
         }
     }
 
-    /**
-     * Record Google Sheets update error
-     */
+    /** Record Google Sheets update error */
     recordSheetsUpdateError(): void {
         this.sheetsUpdateErrorsTotal.inc();
     }
 
-    /**
-     * Measure Google Sheets update duration
-     */
+    /** Measure Google Sheets update duration */
     measureSheetsUpdateDuration(): () => void {
         const end = this.sheetsUpdateDuration.startTimer();
         return () => end();
     }
 
-    /**
-     * Record processed tariffs count
-     */
+    /** Record processed tariffs count */
     recordTariffsProcessed(count: number): void {
         this.tariffsProcessedTotal.inc(count);
     }
 
-    /**
-     * Set active tasks count
-     */
+    /** Set active tasks count */
     setActiveTasks(taskType: string, count: number): void {
         this.activeTasksGauge.labels(taskType).set(count);
     }
 
-    /**
-     * Measure database operation duration
-     */
+    /** Measure database operation duration */
     measureDbOperation(operation: string): () => void {
         const end = this.dbOperationDuration.labels(operation).startTimer();
         return () => end();
     }
 
-    /**
-     * Get metrics in Prometheus format
-     */
-    async getMetrics(): Promise<string> {
-        return await this.registry.metrics();
+    /** Get metrics in Prometheus format */
+    getMetrics(): Promise<string> {
+        return this.registry.metrics();
     }
 
-    /**
-     * Get metrics content type
-     */
+    /** Get metrics content type */
     getContentType(): string {
         return this.registry.contentType;
     }
@@ -197,4 +172,3 @@ export class MetricsService {
 
 // Export singleton instance
 export const metricsService = new MetricsService();
-

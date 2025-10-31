@@ -1,7 +1,4 @@
-/**
- * Example test file - demonstrates test structure
- * Real tests should be written after configuring test environment properly
- */
+/** Example test file - demonstrates test structure Real tests should be written after configuring test environment properly */
 
 describe("Example Test Suite", () => {
     it("should pass a simple test", () => {
@@ -26,4 +23,3 @@ describe("Example Test Suite", () => {
         expect(obj.value).toBe(123);
     });
 });
-

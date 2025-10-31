@@ -5,10 +5,7 @@ import { tariffsRepository } from "#repositories/tariffs.repository.js";
 import { TariffRecord } from "#types/index.js";
 import { metricsService } from "#services/metrics.service.js";
 
-/**
- * Google Sheets Service
- * Handles authentication and data synchronization with Google Sheets
- */
+/** Google Sheets Service Handles authentication and data synchronization with Google Sheets */
 export class GoogleSheetsService {
     private sheets: sheets_v4.Sheets | null = null;
     private readonly sheetName = "stocks_coefs";
@@ -17,9 +14,7 @@ export class GoogleSheetsService {
         this.initializeAuth();
     }
 
-    /**
-     * Initialize Google Sheets API with Service Account authentication
-     */
+    /** Initialize Google Sheets API with Service Account authentication */
     private initializeAuth(): void {
         try {
             if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_PRIVATE_KEY) {
@@ -42,9 +37,7 @@ export class GoogleSheetsService {
         }
     }
 
-    /**
-     * Update all configured Google Sheets with latest tariff data
-     */
+    /** Update all configured Google Sheets with latest tariff data */
     async updateAllSheets(): Promise<void> {
         if (!this.sheets) {
             logger.warn("Google Sheets API not initialized. Skipping update.");
@@ -90,9 +83,7 @@ export class GoogleSheetsService {
         logger.info(`Google Sheets update completed: ${successful} successful, ${failed} failed`);
     }
 
-    /**
-     * Update a single Google Sheet with tariff data
-     */
+    /** Update a single Google Sheet with tariff data */
     private async updateSheet(spreadsheetId: string, tariffs: TariffRecord[]): Promise<void> {
         if (!this.sheets) {
             throw new Error("Google Sheets API not initialized");
@@ -118,16 +109,14 @@ export class GoogleSheetsService {
             });
 
             logger.info(`Successfully updated sheet ${spreadsheetId} with ${tariffs.length} rows`);
-        } catch (error: any) {
-            logger.error(`Error updating sheet ${spreadsheetId}: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            logger.error(`Error updating sheet ${spreadsheetId}: ${message}`);
             throw error;
         }
     }
 
-    /**
-     * Prepare tariff data for Google Sheets format
-     * Sort by coefficient (ascending) and format as 2D array
-     */
+    /** Prepare tariff data for Google Sheets format Sort by coefficient (ascending) and format as 2D array */
     private prepareSheetData(tariffs: TariffRecord[]): string[][] {
         // Header row with all important fields
         const header = [
@@ -143,16 +132,16 @@ export class GoogleSheetsService {
             "Хранение (литр)",
             "Дата обновления",
             "Дата следующей коробки",
-            "Дата до максимума"
+            "Дата до максимума",
         ];
 
         // Data rows (already sorted by coefficient in repository)
         const rows = tariffs.map((tariff) => {
             // Extract additional data from raw_data
             const rawData = tariff.raw_data || {};
-            const geoName = rawData.geoName || "";
-            const deliveryCoef = rawData.boxDeliveryCoefExpr || "0";
-            const storageCoef = rawData.boxStorageCoefExpr || "0";
+            const geoName = String(rawData.geoName || "");
+            const deliveryCoef = String(rawData.boxDeliveryCoefExpr || "0");
+            const storageCoef = String(rawData.boxStorageCoefExpr || "0");
 
             return [
                 tariff.warehouse_name,
@@ -174,9 +163,7 @@ export class GoogleSheetsService {
         return [header, ...rows];
     }
 
-    /**
-     * Clear existing data in the sheet
-     */
+    /** Clear existing data in the sheet */
     private async clearSheet(spreadsheetId: string): Promise<void> {
         if (!this.sheets) {
             throw new Error("Google Sheets API not initialized");
@@ -189,15 +176,14 @@ export class GoogleSheetsService {
             });
 
             logger.info(`Cleared sheet ${spreadsheetId}`);
-        } catch (error: any) {
-            logger.error(`Error clearing sheet ${spreadsheetId}: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            logger.error(`Error clearing sheet ${spreadsheetId}: ${message}`);
             throw error;
         }
     }
 
-    /**
-     * Check if Google Sheets is configured and working
-     */
+    /** Check if Google Sheets is configured and working */
     async testConnection(spreadsheetId: string): Promise<boolean> {
         if (!this.sheets) {
             logger.error("Google Sheets API not initialized");
@@ -211,8 +197,9 @@ export class GoogleSheetsService {
 
             logger.info(`Successfully connected to spreadsheet: ${response.data.properties?.title}`);
             return true;
-        } catch (error: any) {
-            logger.error(`Error testing connection to spreadsheet ${spreadsheetId}: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            logger.error(`Error testing connection to spreadsheet ${spreadsheetId}: ${message}`);
             return false;
         }
     }
@@ -220,4 +207,3 @@ export class GoogleSheetsService {
 
 // Export singleton instance
 export const googleSheetsService = new GoogleSheetsService();
-

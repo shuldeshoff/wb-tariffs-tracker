@@ -1,6 +1,4 @@
-/**
- * Wildberries Tariffs API Response Types
- */
+/** Wildberries Tariffs API Response Types */
 
 export interface WBTariff {
     dtNextBox: string;
@@ -34,9 +32,7 @@ export interface WBTariffResponse {
     };
 }
 
-/**
- * Database Types
- */
+/** Database Types */
 
 export interface TariffRecord {
     id?: number;
@@ -50,14 +46,12 @@ export interface TariffRecord {
     delivery_liter: string;
     storage_base: string;
     storage_liter: string;
-    raw_data: any;
+    raw_data: Record<string, unknown>;
     created_at?: Date;
     updated_at?: Date;
 }
 
-/**
- * Google Sheets Types
- */
+/** Google Sheets Types */
 
 export interface SheetRow {
     warehouse_name: string;
@@ -67,4 +61,3 @@ export interface SheetRow {
     dt_next_box: string;
     dt_till_max: string;
 }
-

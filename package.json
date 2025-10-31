@@ -17,8 +17,9 @@
         "tsc:check": "tsc --allowJs --noEmit",
         "prettier": "prettier --config .prettierrc.json src/**/*.js --check",
         "prettier-format": "prettier --config .prettierrc.json src/**/*.js --write",
-        "eslint": "eslint",
-        "eslint-fix": "eslint --fix"
+        "lint": "eslint src tests --ext .ts",
+        "lint:fix": "eslint src tests --ext .ts --fix",
+        "lint:check": "eslint src tests --ext .ts --max-warnings 0"
     },
     "imports": {
         "#*": [
@@ -49,6 +50,7 @@
         "@babel/core": "^7.23.6",
         "@babel/preset-env": "^7.23.6",
         "@babel/preset-typescript": "^7.24.7",
+        "@eslint/js": "^9.38.0",
         "@types/axios": "^0.14.0",
         "@types/bcrypt": "^5.0.2",
         "@types/cookie-parser": "^1.4.8",
@@ -62,6 +64,8 @@
         "@types/node-cron": "^3.0.11",
         "@types/pg": "^8.11.10",
         "@types/uuid": "^10.0.0",
+        "@typescript-eslint/eslint-plugin": "^8.46.2",
+        "@typescript-eslint/parser": "^8.46.2",
         "babel-jest": "^29.7.0",
         "eslint": "^9.15.0",
         "eslint-config-prettier": "^9.1.0",

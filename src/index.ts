@@ -3,11 +3,9 @@ import { logger } from "#utils/logger.js";
 import { schedulerService } from "#scheduler/index.js";
 import { httpServer } from "#services/http-server.service.js";
 
-/**
- * Main application entry point
- */
+/** Main application entry point */
 class Application {
-    async start(): Promise<void> {
+    start(): void {
         try {
             logger.info("=".repeat(50));
             logger.info("Starting WB Tariffs Service");
@@ -74,4 +72,3 @@ class Application {
 // Start application
 const app = new Application();
 app.start();
-

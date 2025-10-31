@@ -28,4 +28,3 @@ log4js.configure({
 });
 
 export const logger = log4js.getLogger();
-

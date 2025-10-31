@@ -11,27 +11,27 @@ function logMigrationResults(action: string, result: [number, string[]]) {
     }
     console.log(`Batch ${result[0]} ${["latest", "up"].includes(action) ? "ran" : "rolled back"} the following migrations:`);
     for (const migration of result[1]) {
-        console.log("- " + migration);
+        console.log(`- ${migration}`);
     }
 }
 function logMigrationList(list: [{ name: string }[], { file: string }[]]) {
     console.log(`Found ${list[0].length} Completed Migration file/files.`);
     for (const migration of list[0]) {
-        console.log("- " + migration.name);
+        console.log(`- ${migration.name}`);
     }
     console.log(`Found ${list[1].length} Pending Migration file/files.`);
     for (const migration of list[1]) {
-        console.log("- " + migration.file);
+        console.log(`- ${migration.file}`);
     }
 }
 
 function logSeedRun(result: [string[]]) {
-    if(result[0].length === 0) {
+    if (result[0].length === 0) {
         console.log("No seeds to run");
     }
     console.log(`Ran ${result[0].length} seed files`);
-    for(const seed of result[0]) {
-        console.log("- " + seed?.split(/\/|\\/).pop());
+    for (const seed of result[0]) {
+        console.log(`- ${seed?.split(/\/|\\/).pop()}`);
     }
     // Ran 5 seed files
 }

@@ -242,11 +242,7 @@ describe("TariffsRepository", () => {
 
     describe("getAllDates", () => {
         it("должен получить все даты с тарифами", async () => {
-            const dates = [
-                { date: "2025-10-22" },
-                { date: "2025-10-21" },
-                { date: "2025-10-20" },
-            ];
+            const dates = [{ date: "2025-10-22" }, { date: "2025-10-21" }, { date: "2025-10-20" }];
 
             queryBuilder.select.mockResolvedValue(dates);
 
@@ -297,4 +293,3 @@ describe("TariffsRepository", () => {
         });
     });
 });
-

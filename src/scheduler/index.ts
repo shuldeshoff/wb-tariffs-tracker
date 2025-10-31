@@ -4,17 +4,12 @@ import { logger } from "#utils/logger.js";
 import { dataProcessingService } from "#services/data-processing.service.js";
 import { googleSheetsService } from "#services/google-sheets.service.js";
 
-/**
- * Scheduler Service
- * Manages cron jobs for periodic tasks
- */
+/** Scheduler Service Manages cron jobs for periodic tasks */
 export class SchedulerService {
     private fetchDataTask: cron.ScheduledTask | null = null;
     private updateSheetsTask: cron.ScheduledTask | null = null;
 
-    /**
-     * Start all scheduled tasks
-     */
+    /** Start all scheduled tasks */
     start(): void {
         logger.info("Starting scheduler...");
 
@@ -41,9 +36,7 @@ export class SchedulerService {
         this.runInitialTasks();
     }
 
-    /**
-     * Stop all scheduled tasks
-     */
+    /** Stop all scheduled tasks */
     stop(): void {
         logger.info("Stopping scheduler...");
 
@@ -60,9 +53,7 @@ export class SchedulerService {
         logger.info("Scheduler stopped");
     }
 
-    /**
-     * Run initial tasks on application startup
-     */
+    /** Run initial tasks on application startup */
     private async runInitialTasks(): Promise<void> {
         // Fetch WB data first
         await this.fetchWBData();
@@ -73,9 +64,7 @@ export class SchedulerService {
         logger.info("Initial tasks completed");
     }
 
-    /**
-     * Fetch WB data and save to database
-     */
+    /** Fetch WB data and save to database */
     private async fetchWBData(): Promise<void> {
         try {
             const success = await dataProcessingService.fetchAndSaveTariffs();
@@ -90,9 +79,7 @@ export class SchedulerService {
         }
     }
 
-    /**
-     * Update Google Sheets with latest data
-     */
+    /** Update Google Sheets with latest data */
     private async updateGoogleSheets(): Promise<void> {
         try {
             await googleSheetsService.updateAllSheets();
@@ -102,9 +89,7 @@ export class SchedulerService {
         }
     }
 
-    /**
-     * Get status of scheduled tasks
-     */
+    /** Get status of scheduled tasks */
     getStatus(): { fetchData: string; updateSheets: string } {
         return {
             fetchData: this.fetchDataTask ? "running" : "stopped",
@@ -115,4 +100,3 @@ export class SchedulerService {
 
 // Export singleton instance
 export const schedulerService = new SchedulerService();
-

@@ -13,3 +13,4 @@ tests/**/*.js.map
 
 # CSV exports
 *.csv
+.idea/
